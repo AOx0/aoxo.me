@@ -19,9 +19,3 @@ actix-files = "0.5.0"
 
 serde="1.0.126"
 serde_json = "1.0.64"
-
-diesel = { version="1.4.7", features = ["postgres", "r2d2"] }
-r2d2 = "0.8.9"
-
-dotenv = "0.15.0"
-lazy-static = "1.4.0"
