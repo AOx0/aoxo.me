@@ -14,9 +14,25 @@ pub struct Info2 {
     pub name: String
 }
 
-#[derive(Insertable, Serialize, Deserialize)]
+#[derive(Queryable,  Insertable, Serialize, Deserialize)]
 #[table_name="users"]
 pub struct Users {
     pub username: String,
+    pub password: String,
+    pub name: String
+}
+
+#[derive(Queryable,  Insertable, Serialize, Deserialize)]
+#[table_name="users"]
+pub struct UsersLogin {
+    pub username: String,
     pub password: String
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct UsersForm {
+    pub username: String,
+    pub password: String,
+    pub password_repeat: String,
+    pub name: String,
 }

@@ -14,6 +14,7 @@ table! {
         id -> Int8,
         username -> Varchar,
         password -> Varchar,
+        name -> Varchar,
     }
 }
 
