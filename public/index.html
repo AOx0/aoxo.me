@@ -4,29 +4,8 @@
     <meta charset="UTF-8">
     <title>AOx0</title>
     <script type="text/javascript" src="./jquery.js"></script>
-    <script>
-        function post() {
-            $.ajax(
-                {
-                    type: "POST",
-                    url: "/mypost",
-                    data: {
-                        name: $('#name').val()
-                    },
-                    success: function (data) {
-                        $('#result').replaceWith(`<p id="result">${data}</p>`)
-                    }
-                }
-            )
-        }
-
-    </script>
 </head>
 <body>
-    <p>Hi, what's your name?</p>
-    <label for="name">Name</label><input type="text" id="name" value="">
-    <button onclick="post()">Submit</button><br/>
-    <p id="result"></p>
-
+    <p>Hola :)</p>
 </body>
 </html>
