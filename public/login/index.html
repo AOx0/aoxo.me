@@ -18,16 +18,27 @@
                         username: $('#username').val(),
                         password: $('#password').val()
                     },
-                    success: function (data) {
-                        $('#result').replaceWith(`<p class="text-center" id="result">${data}</p>`)
+                    success: function (_) {
+                        window.location.href = "/";
+                    },
+                    error: function (_,__, msg) {
+                        $('#result').replaceWith(`<p class="text-center" id="result">${msg}</p>`)
+
                     }
                 }
             )
         }
+
+        function welcome_msg() {
+            if (document.referrer === "http://aoxo.me/register") {
+                $('#result').replaceWith(`<p class="text-center" id="result">Registro completado con éxito. Ahora puedes iniciar sesión</p>`)
+            }
+
+        }
     </script>
 </head>
 
-<body>
+<body onload="welcome_msg()">
     <section class="d-flex justify-content-center align-items-center highlight-clean">
         <div class="container">
             <div class="intro">

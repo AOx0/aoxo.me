@@ -41,7 +41,7 @@ fn handle_info_get() -> HttpResponse {
 fn login_user(query: Form<models::UsersLogin>) -> HttpResponse {
     let query = query.into_inner();
     let models::UsersLogin {  username, password} = &query;
-
+    let mut success = false;
     use schema::users::dsl as n;
 
     let users: Vec<String> = n::users
@@ -51,14 +51,28 @@ fn login_user(query: Form<models::UsersLogin>) -> HttpResponse {
         .load::<String>(&pool::connect())
         .unwrap();
 
+    let result = if password.replace(" ", "").is_empty() || username.replace(" ", "").is_empty() {
+        "Error: There are empty fields"
+    } else if password.contains(" ") || username.contains(" ") {
+        "Error: Fields can not have spaces"
+    } else if users.len() == 1 {
+        success = true;
+        "Success"
+    } else {
+        "Invalid username/password"
+    };
 
-    HttpResponse::Ok().body(String::from("Inicio de sesión exitoso"))
+    if success {
+        HttpResponse::Ok().body("")
+    } else {
+        HttpResponse::Unauthorized().reason(result).finish()
+    }
 }
 
 fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
     let query = query.into_inner();
     let models::UsersForm { name, username, password, password_repeat } = &query;
-
+    let mut success: bool = false;
     use schema::users::dsl as n;
 
     let users: Vec<String> = n::users
@@ -69,18 +83,18 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
 
 
     let result = if users.len() != 0 {
-        format!("Error: El usuario ya existe")
+        "Error: The user already exists"
     } else if
             name.replace(" ", "") == "" || username.replace(" ", "") == "" ||
             password.replace(" ", "") == "" || password_repeat.replace(" ", "") == ""
     {
-        format!("Error: Llena todos los campos :)")
+        "Error: There are empty fields"
     } else if
-            username.contains(" ") || password.contains(" ") || password_repeat.contains(" ")
+        username.contains(" ") || password.contains(" ") || password_repeat.contains(" ")
     {
-        format!("Error: No deben contener espacios ni el usuario ni la contraseña :)")
-    }else if password != password_repeat {
-        format!("Error: La contraseñas son distintas")
+        "Error: Username/Password fields can not contain spaces :)"
+    } else if password != password_repeat {
+        "Error: Passwords are not the same"
     } else {
         if diesel::insert_into(n::users)
             .values( models::Users{
@@ -90,13 +104,19 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
             } )
             .execute(&pool::connect())
             .is_ok() {
-            format!("Registro exitoso :D")
+            success = true;
+            "Success"
         } else {
-            format!("Algo salió mal :/ Contacta a Ale")
+            "Something went wrong, contact Ale :/"
         }
     };
 
-    HttpResponse::Ok().body(result)
+    if success {
+        HttpResponse::Ok().body("")
+    } else {
+        HttpResponse::Unauthorized().reason(result).finish()
+    }
+
 
 }
 
