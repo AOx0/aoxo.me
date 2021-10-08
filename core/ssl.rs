@@ -1,8 +1,3 @@
-extern crate actix_web;
-extern crate rustls;
-extern crate actix;
-
-use actix_web::{App, HttpServer};
 use std::io::BufReader;
 use rustls::internal::pemfile::{certs, pkcs8_private_keys};
 use rustls::{NoClientAuth, ServerConfig};
