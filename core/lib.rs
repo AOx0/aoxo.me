@@ -5,6 +5,7 @@ use actix_web::{HttpResponse, web};
 mod models;
 mod pool;
 mod schema;
+pub mod ssl;
 
 pub use pool::init_pool;
 use crate::diesel::prelude::*;
