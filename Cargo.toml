@@ -1,5 +1,5 @@
 [package]
-name = "actix"
+name = "aoxo"
 version = "0.1.0"
 edition = "2018"
 
@@ -10,11 +10,13 @@ name = "core"
 path = "core/lib.rs"
 
 [[bin]]
-name = "actix"
+name = "aoxo"
 path = "src/main.rs"
 
 [dependencies]
 actix = "*"
+actix-web-middleware-redirect-scheme = "3.0.0"
+
 actix-web= {version =  "3.3.2", features = ["rustls"] }
 actix-files = "0.5.0"
 openssl = "0.10.36"

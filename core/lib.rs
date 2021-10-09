@@ -2,13 +2,13 @@
 
 use actix_web::web::Form;
 use actix_web::{HttpResponse, web};
+pub use pool::init_pool;
+use crate::diesel::prelude::*;
+
 mod models;
 mod pool;
 mod schema;
 pub mod ssl;
-
-pub use pool::init_pool;
-use crate::diesel::prelude::*;
 
 fn handle_info_post(query: Form<models::Info>) -> HttpResponse {
     let query = query.into_inner();
@@ -120,6 +120,7 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
 
 
 }
+
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg

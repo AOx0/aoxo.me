@@ -4,22 +4,6 @@ version = 3
 
 [[package]]
 name = "actix"
-version = "0.1.0"
-dependencies = [
- "actix 0.12.0",
- "actix-files",
- "actix-web",
- "diesel",
- "dotenv",
- "lazy_static",
- "openssl",
- "r2d2",
- "rustls",
- "serde",
-]
-
-[[package]]
-name = "actix"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3720d0064a0ce5c0de7bd93bdb0a6caebab2a9b5668746145d7b3b0c5da02914"
@@ -343,6 +327,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-web-middleware-redirect-scheme"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "711ca00d71f91aadf3b2b89e3c28e9d9a48b5f28f861a2bd195cd689f1f553bd"
+dependencies = [
+ "actix-service",
+ "actix-web",
+ "futures",
+]
+
+[[package]]
 name = "actix_derive"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -366,6 +361,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e37cfd5e7657ada45f742d6e99ca5788580b5c529dc78faf11ece6dc702656f"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "aoxo"
+version = "0.1.0"
+dependencies = [
+ "actix",
+ "actix-files",
+ "actix-web",
+ "actix-web-middleware-redirect-scheme",
+ "diesel",
+ "dotenv",
+ "lazy_static",
+ "openssl",
+ "r2d2",
+ "rustls",
+ "serde",
 ]
 
 [[package]]
@@ -742,6 +754,7 @@ checksum = "0e7e43a803dae2fa37c1f6a8fe121e1f7bf9548b4dfc0522a42f34145dadfc27"
 dependencies = [
  "futures-channel",
  "futures-core",
+ "futures-executor",
  "futures-io",
  "futures-sink",
  "futures-task",
@@ -763,6 +776,17 @@ name = "futures-core"
 version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0402f765d8a89a26043b889b26ce3c4679d268fa6bb22cd7c6aad98340e179d1"
+
+[[package]]
+name = "futures-executor"
+version = "0.3.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "badaa6a909fac9e7236d0620a2f57f7664640c56575b71a7552fbd68deafab79"
+dependencies = [
+ "futures-core",
+ "futures-task",
+ "futures-util",
+]
 
 [[package]]
 name = "futures-io"
