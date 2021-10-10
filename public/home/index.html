@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Course</title>
+    <script type="text/javascript" src="./../jquery.js"></script>
+    <link rel="stylesheet" href="/home/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/home/assets/css/Highlight-Phone.css">
+    <link rel="stylesheet" href="/home/assets/css/styles.css">
+    <script>
+        function change(file_id) {
+            const file = document.getElementById(file_id).files[0];
+            if (file) {
+                $('.jaja').css("background-color" , "gray");
+                $('#file1_name').html(file.name);
+            }
+        }
+
+        function post(mission, file_id) {
+
+            const file = document.getElementById(file_id).files[0];
+
+            if (file) {
+                var contents = "";
+                var reader = new FileReader();
+                reader.readAsText(file, "UTF-8");
+                reader.onload = function (evt) {
+                    contents = evt.target.result;
+
+                    $.ajax(
+                        {
+                            type: "POST",
+                            url: mission,
+                            data: {
+                                file: contents,
+                            },
+                            success: function (_) {
+
+                            },
+                            error: function (_, __, msg) {
+                                $('#result').replaceWith(`<p class="text-center" id="result">${msg}</p>`)
+                            }
+                        }
+                    )
+                }
+                reader.onerror = function (evt) {
+                    // Nada
+                }
+
+
+
+
+            }
+        }
+    </script>
+</head>
+
+<body style="height: 650px;">
+    <section class="highlight-phone" style="background: rgba(238,244,247,0);">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="intro">
+                        <h2>Mission 1</h2>
+                        <p>Write a program that prints <code>Hello World</code>&nbsp;to the console</p>
+
+                        <style>
+                            input[type="file"] {
+                                display: none;
+                            }
+
+                            .jaja:hover {
+                                color: gray
+                            }
+
+                            .jaja {
+                                background-color: rgb(0, 100, 255);
+                                color : white;
+
+                            }
+
+                        </style>
+
+                        <p id="file1_name" style="margin-bottom: 0px"></p>
+                        <label class="btn btn-secondary jaja" style="color: white; background-color: rgb(0, 100, 255);" >
+                            <input id="file1" type="file" style="color: regb(0,0,0);" onchange="change('file1')"/>
+                            Upload File
+                        </label>
+                        <button class="btn btn-primary" type="button" onclick="post('/mission1', 'file1')">Submit</button>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="d-none d-md-block phone-mockup"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="/home/assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>

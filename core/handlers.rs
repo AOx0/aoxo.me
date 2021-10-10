@@ -163,9 +163,19 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
 
 }
 
+fn handle_file_1(file: Form<models::File>) -> HttpResponse {
+    let file = file.into_inner();
+    let models::File { file } = &file;
+
+    println!("{}", file);
+
+    HttpResponse::Ok().body("")
+}
+
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg
         .service(web::resource("/new_user").route(web::post().to(new_user)))
-        .service(web::resource("/log_user").route(web::post().to(login_user)));
+        .service(web::resource("/log_user").route(web::post().to(login_user)))
+        .service(web::resource("/mission1").route(web::post().to(handle_file_1)));
 }

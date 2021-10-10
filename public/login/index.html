@@ -19,7 +19,7 @@
                         password: $('#password').val()
                     },
                     success: function (_) {
-                        window.location.href = "/";
+                        window.location.href = "/home";
                     },
                     error: function (_,__, msg) {
                         $('#result').replaceWith(`<p class="text-center" id="result">${msg}</p>`)
@@ -30,10 +30,9 @@
         }
 
         function welcome_msg() {
-            if (document.referrer === "http://aoxo.me/register") {
+            if (document.referrer === "https://aoxo.me/register") {
                 $('#result').replaceWith(`<p class="text-center" id="result">Registro completado con éxito. Ahora puedes iniciar sesión</p>`)
             }
-
         }
     </script>
 </head>

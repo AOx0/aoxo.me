@@ -36,3 +36,8 @@ pub struct UsersForm {
     pub password_repeat: String,
     pub name: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct File {
+    pub file: String
+}
