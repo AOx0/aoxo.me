@@ -1,3 +1,10 @@
+//! Cookie-based session tools
+//!
+//! Does not create cookies by itself but stores methods to generate new id session strings.
+//!
+//! `USERS_NAMES`, a Mutex<HashMap<String, String>> that stores by session_id, user all users that are logged in
+//! `USERS` a  Mutex<Vec<String>> that stores all session ids that are logged in. `main` function reads them and checks if the user has a cookie equal to one of them.
+
 use std::collections::HashMap;
 use lazy_static::lazy_static;
 use std::sync::Mutex;
@@ -26,11 +33,14 @@ pub fn get_user_name(session: String) -> Option<String> {
 
 }
 
+/// Adds a user's name to USERS_NAMES
 pub fn associate(user: String, session: String) {
     let mut dict =  USERS_NAMES.lock().unwrap();
     dict.insert(session, user);
 }
 
+/// Generates a random 64-char string. Used to identify users (only when logged in)
+/// No session_key is generated for non logged in users
 pub fn generate_new_session_cookie() -> String {
     (0..64).map(|_| (0x20u8 + (random::<f32>() * 96.0) as u8) as char).collect()
 }

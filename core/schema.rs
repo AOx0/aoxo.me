@@ -1,4 +1,9 @@
-// Generated with `diesel print-schema` .env necessary
+//! ORM schema generated with `diesel print-schema` .env necessary
+//! ```txt
+//! DATABASE_URL=postgres://alejandro:252525@localhost/actix_test
+//! ```
+//!
+//! Necessary to have ORM. Structs can be serialized and deserialized from them
 
 table! {
     names (name_id) {
