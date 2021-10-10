@@ -1,7 +1,10 @@
 #[macro_use] extern crate diesel;
 
 use actix_web::web::Form;
+use actix_web::http::header::{CacheControl, CacheDirective};
 use actix_web::{HttpResponse, web};
+
+use actix_session::*;
 pub use pool::init_pool;
 use crate::diesel::prelude::*;
 
@@ -9,6 +12,9 @@ mod models;
 mod pool;
 mod schema;
 pub mod ssl;
+pub mod sessions;
+pub mod cache_middleware;
+
 
 fn handle_info_post(query: Form<models::Info>) -> HttpResponse {
     let query = query.into_inner();
@@ -39,10 +45,10 @@ fn handle_info_get() -> HttpResponse {
         .body(format!("Our users are: {:?}", users))
 }
 
-fn login_user(query: Form<models::UsersLogin>) -> HttpResponse {
+fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse {
+    // println!("En login: {:?}", session.get::<String>("session"));
     let query = query.into_inner();
     let models::UsersLogin {  username, password} = &query;
-    let mut success = false;
     use schema::users::dsl as n;
 
     let users: Vec<String> = n::users
@@ -52,21 +58,34 @@ fn login_user(query: Form<models::UsersLogin>) -> HttpResponse {
         .load::<String>(&pool::connect())
         .unwrap();
 
-    let result = if password.replace(" ", "").is_empty() || username.replace(" ", "").is_empty() {
-        "Error: There are empty fields"
-    } else if password.contains(" ") || username.contains(" ") {
-        "Error: Fields can not have spaces"
-    } else if users.len() == 1 {
-        success = true;
-        "Success"
-    } else {
-        "Invalid username/password"
-    };
+    let cookie: String;
 
-    if success {
-        HttpResponse::Ok().body("")
+    if password.replace(" ", "").is_empty() || username.replace(" ", "").is_empty() {
+        HttpResponse::Unauthorized()
+            .set(CacheControl(vec![CacheDirective::NoCache]))
+            .set(CacheControl(vec![CacheDirective::NoStore]))
+            .reason("Error: There are empty fields").finish()
+    } else if password.contains(" ") || username.contains(" ") {
+        HttpResponse::Unauthorized()
+            .set(CacheControl(vec![CacheDirective::NoCache]))
+            .set(CacheControl(vec![CacheDirective::NoStore]))
+            .reason("Error: Fields can not have spaces").finish()
+    } else if users.len() == 1 {
+        cookie = crate::sessions::generate_new_session_cookie();
+        crate::sessions::add_session(cookie.clone());
+        crate::sessions::add_session(cookie.clone());
+
+        session.set("session",cookie ).unwrap();
+
+        HttpResponse::Ok()
+            .set(CacheControl(vec![CacheDirective::NoCache]))
+            .set(CacheControl(vec![CacheDirective::NoStore]))
+            .body("")
     } else {
-        HttpResponse::Unauthorized().reason(result).finish()
+        HttpResponse::Unauthorized()
+            .set(CacheControl(vec![CacheDirective::NoCache]))
+            .set(CacheControl(vec![CacheDirective::NoStore]))
+            .reason("Invalid username/password").finish()
     }
 }
 
@@ -113,9 +132,16 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
     };
 
     if success {
-        HttpResponse::Ok().body("")
+        HttpResponse::Ok()
+            .set(CacheControl(vec![CacheDirective::NoCache]))
+            .set(CacheControl(vec![CacheDirective::NoStore]))
+            .body("")
+
     } else {
-        HttpResponse::Unauthorized().reason(result).finish()
+        HttpResponse::Unauthorized().reason(result)
+            .set(CacheControl(vec![CacheDirective::NoCache]))
+            .set(CacheControl(vec![CacheDirective::NoStore]))
+            .finish()
     }
 
 

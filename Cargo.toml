@@ -15,16 +15,33 @@ path = "src/main.rs"
 
 [dependencies]
 actix = "*"
+
+# Forces requests to be https
 actix-web-middleware-redirect-scheme = "3.0.0"
 
+# Used to generate cookie strings
+rand = "0.8.4"
+time = "0.2.27"
+regex = "1.5.4"
+futures = "0.3.1"
+
 actix-web= {version =  "3.3.2", features = ["rustls"] }
+actix-session = "0.4.1"
+
+# To serve files automatically
 actix-files = "0.5.0"
-openssl = "0.10.36"
 rustls = "0.18.1"
 
+# To make objects from json to data rust types
 serde="1.0.126"
+serde_json = "1.0.64"
 
+# To communicate to db
 diesel = { version="1.4.7", features = ["postgres", "r2d2"]}
+# To create pool of connections
 r2d2 = "0.8.9"
+# To have .env file and retrieve it
 dotenv = "0.15.0"
+
+# To have global variables
 lazy_static = "1.4.0"
