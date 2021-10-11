@@ -41,23 +41,23 @@ async fn main() -> std::io::Result<()> {
 
 
                         if req.get_session().get::<bool>("mission1").unwrap().unwrap() {
-                            home = home.replace("Mission 1", "Mission 1 (Completed)");
+                            home = home.replace("Mission 1", "Mission 1 ✔");
                         }
 
                         if req.get_session().get::<bool>("mission2").unwrap().unwrap() {
-                            home = home.replace("Mission 2", "Mission 2 (Completed)");
+                            home = home.replace("Mission 2", "Mission 2 ✔");
                         }
 
                         if req.get_session().get::<bool>("mission3").unwrap().unwrap() {
-                            home = home.replace("Mission 3", "Mission 3 (Completed)");
+                            home = home.replace("Mission 3", "Mission 3 ✔");
                         }
 
                         if req.get_session().get::<bool>("mission4").unwrap().unwrap() {
-                            home = home.replace("Mission 4", "Mission 4 (Completed)");
+                            home = home.replace("Mission 4", "Mission 4 ✔");
                         }
 
                         if req.get_session().get::<bool>("mission5").unwrap().unwrap() {
-                            home = home.replace("Mission 5", "Mission 5 (Completed)");
+                            home = home.replace("Mission 5", "Mission 5 ✔");
                         }
 
                         Either::Right(ok(req.into_response(
