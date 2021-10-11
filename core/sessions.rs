@@ -11,7 +11,7 @@ use std::sync::Mutex;
 use rand::random;
 
 use crate::diesel::prelude::*;
-use crate::{models, pool, schema};
+use crate::{pool, schema};
 
 lazy_static! {
     pub static ref USERS_NAMES: Mutex<HashMap<String, String>> = {

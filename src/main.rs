@@ -1,4 +1,3 @@
-use actix::ActorTryFutureExt;
 use actix_files::Files;
 use actix_web::{App, http, HttpResponse, HttpServer, web};
 use actix_web::cookie::SameSite;
@@ -8,7 +7,7 @@ use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use futures::future::{Either, ok};
 
 use actix_session::*;
-use diesel::BoolExpressionMethods;
+use core::handlers::get_mission_status;
 use core::sessions;
 
 #[actix_web::main]
@@ -36,11 +35,34 @@ async fn main() -> std::io::Result<()> {
                     }
 
                     if logged_in && req.path() == "/home" {
-                        let home = include_str!("../public/home/index.html");
+                        let mut home = include_str!("../public/home/index.html").to_string();
+
+                        get_mission_status(req.get_session());
+
+
+                        if req.get_session().get::<bool>("mission1").unwrap().unwrap() {
+                            home = home.replace("Mission 1", "Mission 1 (Completed)");
+                        }
+
+                        if req.get_session().get::<bool>("mission2").unwrap().unwrap() {
+                            home = home.replace("Mission 2", "Mission 2 (Completed)");
+                        }
+
+                        if req.get_session().get::<bool>("mission3").unwrap().unwrap() {
+                            home = home.replace("Mission 3", "Mission 3 (Completed)");
+                        }
+
+                        if req.get_session().get::<bool>("mission4").unwrap().unwrap() {
+                            home = home.replace("Mission 4", "Mission 4 (Completed)");
+                        }
+
+                        if req.get_session().get::<bool>("mission5").unwrap().unwrap() {
+                            home = home.replace("Mission 5", "Mission 5 (Completed)");
+                        }
 
                         Either::Right(ok(req.into_response(
                             HttpResponse::Ok()
-                                .body(home.replace("Mission", "Hola"))
+                                .body(home)
 
                         )))
                     } else if logged_in  {

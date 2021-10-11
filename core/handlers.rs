@@ -44,7 +44,7 @@
 //! ```
 //!
 
-use actix_web::web::{Form, service, ServiceConfig};
+use actix_web::web::{Form};
 use actix_web::http::header::{CacheControl, CacheDirective};
 use actix_web::{HttpResponse, web};
 use actix_session::*;
@@ -66,13 +66,33 @@ impl NoCache for HttpResponseBuilder {
     }
 }
 
+pub fn get_mission_status(session: Session) {
+    use schema::missions::dsl as m;
+
+    let username = sessions::get_user_name(session.get::<String>("session").unwrap().unwrap());
+    let user_id = sessions::get_user_id_in_db(username.unwrap());
+
+    let missions: models::Missions =  m::missions
+        .filter(m::user_id.eq(user_id))
+        .select((m::mission1, m::mission2, m::mission3, m::mission4, m::mission5))
+        .first::<models::Missions>(&pool::connect())
+        .unwrap();
+
+    println!("{:?}", missions);
+
+    session.set("mission1", missions.mission1).expect("Failed to get mission1");
+    session.set("mission2", missions.mission2).expect("Failed to get mission2");
+    session.set("mission3", missions.mission3).expect("Failed to get mission3");
+    session.set("mission4", missions.mission4).expect("Failed to get mission4");
+    session.set("mission5", missions.mission5).expect("Failed to get mission5");
+}
+
 
 fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse {
     // println!("En login: {:?}", session.get::<String>("session"));
     let query = query.into_inner();
     let models::UsersLogin {  username, password} = &query;
     use schema::users::dsl as n;
-    use schema::missions::dsl as m;
 
     let users: Vec<String> = n::users
         .filter(n::username.eq(username.to_ascii_uppercase()))
@@ -97,6 +117,7 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
         crate::sessions::associate(username.clone().to_uppercase(), cookie.clone());
 
         session.set("session",cookie ).unwrap();
+        get_mission_status(session);
 
         HttpResponse::Ok()
             .no_cache()

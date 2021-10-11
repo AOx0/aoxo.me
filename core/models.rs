@@ -1,7 +1,6 @@
 use serde::{Serialize, Deserialize};
 use crate::diesel::*;
 use crate::schema::*;
-use crate::diesel::Identifiable;
 
 #[derive(Queryable, Serialize, Deserialize)]
 pub struct User {
@@ -37,7 +36,7 @@ pub struct File {
     pub file_id: String
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Debug)]
 pub struct Missions {
     pub mission1: bool,
     pub mission2: bool,
