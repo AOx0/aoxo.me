@@ -50,7 +50,7 @@ use actix_web::{HttpResponse, web};
 use actix_session::*;
 use actix_web::dev::HttpResponseBuilder;
 use crate::diesel::prelude::*;
-use crate::{models, pool, schema};
+use crate::{models, pool, schema, sessions};
 
 
 trait NoCache {
@@ -72,6 +72,7 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
     let query = query.into_inner();
     let models::UsersLogin {  username, password} = &query;
     use schema::users::dsl as n;
+    use schema::missions::dsl as m;
 
     let users: Vec<String> = n::users
         .filter(n::username.eq(username.to_ascii_uppercase()))
@@ -145,17 +146,13 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
             .is_ok() {
 
 
+            let user_id = sessions::get_user_id_in_db(username.to_ascii_uppercase());
 
-            if let Ok(id) = n::users.select(n::id)
-                .filter(n::username.eq(username.to_ascii_uppercase()))
-                .first::<i64>(&pool::connect()) {
-
-                    diesel::insert_into(m::missions)
-                        .values( models::NewMission {
-                            user_id: id
-                        } )
-                        .execute(&pool::connect())
-                        .unwrap();
+            if user_id != 0 {
+                diesel::insert_into(m::missions)
+                    .values( models::NewMission { user_id } )
+                    .execute(&pool::connect())
+                    .unwrap();
 
                 success = true;
                 "Success"

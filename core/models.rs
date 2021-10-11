@@ -37,16 +37,13 @@ pub struct File {
     pub file_id: String
 }
 
-#[derive(Identifiable)]
-#[table_name="missions"]
+#[derive(Queryable)]
 pub struct Missions {
     pub mission1: bool,
     pub mission2: bool,
     pub mission3: bool,
     pub mission4: bool,
     pub mission5: bool,
-    pub user_id: i64,
-    pub id: i64,
 }
 
 #[derive(Queryable,  Insertable)]

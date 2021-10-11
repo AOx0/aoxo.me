@@ -10,6 +10,9 @@ use lazy_static::lazy_static;
 use std::sync::Mutex;
 use rand::random;
 
+use crate::diesel::prelude::*;
+use crate::{models, pool, schema};
+
 lazy_static! {
     pub static ref USERS_NAMES: Mutex<HashMap<String, String>> = {
          Mutex::new(HashMap::new())
@@ -56,4 +59,16 @@ pub fn is_user_registered(session: String) -> bool {
 pub fn init_sessions() {
     lazy_static::initialize(&USERS);
     lazy_static::initialize(&USERS_NAMES);
+}
+
+pub fn get_user_id_in_db(username: String) -> i64 {
+    use schema::users::dsl as n;
+
+    if let Ok(id) = n::users.select(n::id)
+        .filter(n::username.eq(username.to_ascii_uppercase()))
+        .first::<i64>(&pool::connect()) {
+        id
+    } else {
+        0
+    }
 }
