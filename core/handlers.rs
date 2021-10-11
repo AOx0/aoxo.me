@@ -44,7 +44,7 @@
 //! ```
 //!
 
-use actix_web::web::Form;
+use actix_web::web::{Form, service, ServiceConfig};
 use actix_web::http::header::{CacheControl, CacheDirective};
 use actix_web::{HttpResponse, web};
 use actix_session::*;
@@ -93,7 +93,7 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
     } else if users.len() == 1 {
         cookie = crate::sessions::generate_new_session_cookie();
         crate::sessions::add_session(cookie.clone());
-        crate::sessions::add_session(cookie.clone());
+        crate::sessions::associate(username.clone().to_uppercase(), cookie.clone());
 
         session.set("session",cookie ).unwrap();
 
@@ -113,6 +113,7 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
     let models::UsersForm { name, username, password, password_repeat } = &query;
     let mut success: bool = false;
     use schema::users::dsl as n;
+    use schema::missions::dsl as m;
 
     let users: Vec<String> = n::users
         .filter(n::username.eq(username.to_ascii_uppercase()))
@@ -142,8 +143,30 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
             } )
             .execute(&pool::connect())
             .is_ok() {
-            success = true;
-            "Success"
+
+
+
+            if let Ok(id) = n::users.select(n::id)
+                .filter(n::username.eq(username.to_ascii_uppercase()))
+                .first::<i64>(&pool::connect()) {
+
+                    diesel::insert_into(m::missions)
+                        .values( models::NewMission {
+                            user_id: id
+                        } )
+                        .execute(&pool::connect())
+                        .unwrap();
+
+                success = true;
+                "Success"
+            } else {
+                "Something went wrong, contact Ale :/"
+            }
+
+
+
+
+
         } else {
             "Something went wrong, contact Ale :/"
         }
@@ -163,19 +186,21 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
 
 }
 
-fn handle_file_1(file: Form<models::File>) -> HttpResponse {
+fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
     let file = file.into_inner();
-    let models::File { file } = &file;
+    let models::File { file, file_id } = &file;
 
-    println!("{}", file);
+    println!("\n\nUser: {}", crate::sessions::get_user_name(session.get("session").unwrap().unwrap()).unwrap());
+    println!("Session: {}", session.get::<String>("session").unwrap().unwrap());
+    println!("File ID: {}", file_id);
+    println!("{}\n\n", file);
 
     HttpResponse::Ok().body("")
 }
-
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg
         .service(web::resource("/new_user").route(web::post().to(new_user)))
         .service(web::resource("/log_user").route(web::post().to(login_user)))
-        .service(web::resource("/mission1").route(web::post().to(handle_file_1)));
+        .service(web::resource("/mission").route(web::post().to(handle_file)));
 }

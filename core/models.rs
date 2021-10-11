@@ -1,17 +1,11 @@
 use serde::{Serialize, Deserialize};
 use crate::diesel::*;
 use crate::schema::*;
+use crate::diesel::Identifiable;
 
-#[derive(Insertable, Serialize, Deserialize)]
-#[table_name="names"]
-pub struct Info {
-    pub name: String
-}
-
-#[derive(Queryable, Debug)]
-pub struct Info2 {
-    pub name_id: i64,
-    pub name: String
+#[derive(Queryable, Serialize, Deserialize)]
+pub struct User {
+    pub id: i64
 }
 
 #[derive(Queryable,  Insertable, Serialize, Deserialize)]
@@ -39,5 +33,24 @@ pub struct UsersForm {
 
 #[derive(Serialize, Deserialize)]
 pub struct File {
-    pub file: String
+    pub file: String,
+    pub file_id: String
+}
+
+#[derive(Identifiable)]
+#[table_name="missions"]
+pub struct Missions {
+    pub mission1: bool,
+    pub mission2: bool,
+    pub mission3: bool,
+    pub mission4: bool,
+    pub mission5: bool,
+    pub user_id: i64,
+    pub id: i64,
+}
+
+#[derive(Queryable,  Insertable)]
+#[table_name="missions"]
+pub struct NewMission {
+    pub user_id: i64,
 }

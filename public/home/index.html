@@ -9,16 +9,49 @@
     <link rel="stylesheet" href="/home/assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/home/assets/css/Highlight-Phone.css">
     <link rel="stylesheet" href="/home/assets/css/styles.css">
+    <style>
+        input[type="file"] {
+            display: none;
+        }
+
+        .file3:hover, .file1:hover, .file2:hover  {
+            color: gray
+        }
+
+        .file1 {
+            background-color: rgb(0, 100, 255);
+            color : white;
+
+        }
+
+        .file2 {
+            background-color: rgb(0, 100, 255);
+            color : white;
+
+        }
+
+        .file3 {
+            background-color: rgb(0, 100, 255);
+            color : white;
+
+        }
+
+
+    </style>
     <script>
+        function show_completed(file_id) {
+
+        }
+
         function change(file_id) {
             const file = document.getElementById(file_id).files[0];
             if (file) {
-                $('.jaja').css("background-color" , "gray");
-                $('#file1_name').html(file.name);
+                $('.'+file_id).css("background-color" , "gray");
+                $('#' + file_id + "_name").html(file.name);
             }
         }
 
-        function post(mission, file_id) {
+        function post(file_id) {
 
             const file = document.getElementById(file_id).files[0];
 
@@ -32,9 +65,10 @@
                     $.ajax(
                         {
                             type: "POST",
-                            url: mission,
+                            url: "/mission",
                             data: {
                                 file: contents,
+                                file_id: file_id
                             },
                             success: function (_) {
 
@@ -66,29 +100,42 @@
                         <h2>Mission 1</h2>
                         <p>Write a program that prints <code>Hello World</code>&nbsp;to the console</p>
 
-                        <style>
-                            input[type="file"] {
-                                display: none;
-                            }
 
-                            .jaja:hover {
-                                color: gray
-                            }
 
-                            .jaja {
-                                background-color: rgb(0, 100, 255);
-                                color : white;
-
-                            }
-
-                        </style>
-
-                        <p id="file1_name" style="margin-bottom: 0px"></p>
-                        <label class="btn btn-secondary jaja" style="color: white; background-color: rgb(0, 100, 255);" >
-                            <input id="file1" type="file" style="color: regb(0,0,0);" onchange="change('file1')"/>
+                        <p id="file1_name" style="margin-bottom: 0"></p>
+                        <label class="btn btn-secondary file1" style="color: white; background-color: rgb(0, 100, 255);" >
+                            <input id="file1" type="file" style="color: rgb(0,0,0);" onchange="change('file1')"/>
                             Upload File
                         </label>
-                        <button class="btn btn-primary" type="button" onclick="post('/mission1', 'file1')">Submit</button>
+                        <button class="btn btn-primary" type="button" onclick="post('file1')">Submit</button>
+                    </div>
+                </div>
+                <p></p><hr><p></p>
+                <div class="col-md-8">
+                    <div class="intro">
+                        <h2>Mission 2</h2>
+                        <p>Write a program that prints <code>Hello World</code>&nbsp;to the console</p>
+
+                        <p id="file2_name" style="margin-bottom: 0"></p>
+                        <label class="btn btn-secondary file2" style="color: white; background-color: rgb(0, 100, 255);" >
+                            <input id="file2" type="file" style="color: rgb(0,0,0);" onchange="change('file2')"/>
+                            Upload File
+                        </label>
+                        <button class="btn btn-primary" type="button" onclick="post('file2')">Submit</button>
+                    </div>
+                </div>
+                <p></p><hr><p></p>
+                <div class="col-md-8">
+                    <div class="intro">
+                        <h2>Mission 3</h2>
+                        <p>Write a program that prints <code>Hello World</code>&nbsp;to the console</p>
+
+                        <p id="file3_name" style="margin-bottom: 0"></p>
+                        <label class="btn btn-secondary file3" style="color: white; background-color: rgb(0, 100, 255);" >
+                            <input id="file3" type="file" style="color: rgb(0,0,0);" onchange="change('file3')"/>
+                            Upload File
+                        </label>
+                        <button class="btn btn-primary" type="button" onclick="post('file3')">Submit</button>
                     </div>
                 </div>
                 <div class="col-sm-4">

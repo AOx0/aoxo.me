@@ -1,3 +1,4 @@
+use actix::ActorTryFutureExt;
 use actix_files::Files;
 use actix_web::{App, http, HttpResponse, HttpServer, web};
 use actix_web::cookie::SameSite;
@@ -7,6 +8,7 @@ use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use futures::future::{Either, ok};
 
 use actix_session::*;
+use diesel::BoolExpressionMethods;
 use core::sessions;
 
 #[actix_web::main]
@@ -33,7 +35,15 @@ async fn main() -> std::io::Result<()> {
                         Session::set_session(vec![to_insert], &mut req);
                     }
 
-                    if logged_in  {
+                    if logged_in && req.path() == "/home" {
+                        let home = include_str!("../public/home/index.html");
+
+                        Either::Right(ok(req.into_response(
+                            HttpResponse::Ok()
+                                .body(home.replace("Mission", "Hola"))
+
+                        )))
+                    } else if logged_in  {
                         if req.path() != "/register"  && req.path() != "/login" {
                             Either::Left(srv.call(req))
                         } else {
