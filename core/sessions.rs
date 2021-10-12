@@ -26,23 +26,28 @@ lazy_static! {
     };
 }
 
-pub struct UserInfo(pub String, pub String, pub i64);
+#[derive(Debug)]
+pub struct UserInfo{
+    pub username: String,
+    pub session_id: String,
+    pub user_id: i64
+}
 
 pub fn get_vital_info(session: &Session) -> UserInfo {
     let session_id = self::get_session(session);
-    let username = self::get_user_name(&session_id).unwrap();
+    let username = self::get_user_name(&session_id);
     let user_id = self::get_user_id_in_db(&username);
 
-    return UserInfo(username,session_id,  user_id);
+    return UserInfo{username,session_id,  user_id};
 }
 
-pub fn get_user_name(session_id: &str) -> Option<String> {
+pub fn get_user_name(session_id: &str) -> String {
     let dict =  USERS_NAMES.lock().unwrap();
 
     return if dict.contains_key(session_id) {
-        Some(dict.get(session_id).unwrap().clone())
+        dict.get(session_id).unwrap().clone()
     } else {
-        None
+        "Error".to_string()
     }
 
 }
@@ -67,8 +72,8 @@ pub fn add_session(session: &str) {
     USERS.lock().unwrap().push(session.to_string());
 }
 
-pub fn is_user_registered(session: String) -> bool {
-    USERS.lock().unwrap().contains(&session)
+pub fn is_user_logged_in(session: &Session) -> bool {
+    USERS.lock().unwrap().contains(&self::get_vital_info(session).session_id)
 }
 
 pub fn init_sessions() {

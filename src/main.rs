@@ -22,13 +22,15 @@ async fn main() -> std::io::Result<()> {
             .wrap_fn(|mut req, srv|{
                 let urls = vec!["/", "/register", "/home","/login" ];
 
+                let session = req.get_session();
+
                 if !urls.contains(&req.path()) {
                     Either::Left(srv.call(req))
                 } else {
                     let mut logged_in : bool = false;
 
-                    if let Some(key) = req.get_session().get::<String>("session").unwrap() {
-                        logged_in = sessions::is_user_registered(key);
+                    if let Some(_) = req.get_session().get::<String>("session").unwrap() {
+                        logged_in = sessions::is_user_logged_in(&session);
                     } else {
                         let to_insert = ("session".to_string(), serde_json::to_string(&"NONE".to_string()).unwrap());
                         Session::set_session(vec![to_insert], &mut req);

@@ -46,7 +46,7 @@
 
 use actix_web::web::{Form};
 use actix_web::http::header::{CacheControl, CacheDirective};
-use actix_web::{HttpResponse, web};
+use actix_web::{http, HttpResponse, web};
 use actix_session::*;
 use actix_web::dev::HttpResponseBuilder;
 use crate::diesel::prelude::*;
@@ -69,7 +69,7 @@ impl NoCache for HttpResponseBuilder {
 pub fn get_mission_status(session: Session) {
     use schema::missions::dsl as m;
 
-    let sessions::UserInfo(_, _, user_id) = sessions::get_vital_info(&session);
+    let user_id = sessions::get_vital_info(&session).user_id;
 
     let missions: models::Missions =  m::missions
         .filter(m::user_id.eq(user_id))
@@ -211,22 +211,33 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
 
 }
 
-fn handle_file(_session: Session, file: Form<models::File>) -> HttpResponse {
-    let file = file.into_inner();
-    let models::File {file_id, .. } = &file;
-    // let sessions::UserInfo(username, session_id, user_id) = sessions::get_vital_info(&session);
+fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
 
 
-    match file_id.as_str() {
-        "file1" => println!("file1"),
-        "file2" => println!("file2"),
-        "file3" => println!("file3"),
-        "file4" => println!("file4"),
-        "file5" => println!("file5"),
-        _ => {}
+    if sessions::is_user_logged_in(&session) {
+        let session_info = sessions::get_vital_info(&session);
+        let file = file.into_inner();
+        let models::File {file_id, .. } = &file;
+
+
+        println!("{:?}", session_info);
+
+        match file_id.as_str() {
+            "file1" => println!("file1"),
+            "file2" => println!("file2"),
+            "file3" => println!("file3"),
+            "file4" => println!("file4"),
+            "file5" => println!("file5"),
+            _ => {}
+        }
+
+        HttpResponse::Ok().body("")
+    } else {
+        HttpResponse::Found()
+            .header(http::header::LOCATION, "/login")
+            .finish()
+            .into_body()
     }
-
-    HttpResponse::Ok().body("")
 }
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
