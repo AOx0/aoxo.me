@@ -69,8 +69,7 @@ impl NoCache for HttpResponseBuilder {
 pub fn get_mission_status(session: Session) {
     use schema::missions::dsl as m;
 
-    let username = sessions::get_user_name(session.get::<String>("session").unwrap().unwrap());
-    let user_id = sessions::get_user_id_in_db(username.unwrap());
+    let sessions::UserInfo(_, user_id) = sessions::get_vital_info(&session);
 
     let missions: models::Missions =  m::missions
         .filter(m::user_id.eq(user_id))
@@ -94,14 +93,17 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
     let models::UsersLogin {  username, password} = &query;
     use schema::users::dsl as n;
 
+    let username = &username.to_ascii_uppercase();
+    let password = &password.to_ascii_uppercase();
+
     let users: Vec<String> = n::users
-        .filter(n::username.eq(username.to_ascii_uppercase()))
-        .filter(n::password.eq(password.to_ascii_uppercase()))
+        .filter(n::username.eq(username))
+        .filter(n::password.eq(password))
         .select(n::username)
         .load::<String>(&pool::connect())
         .unwrap();
 
-    let cookie: String;
+
 
     if password.replace(" ", "").is_empty() || username.replace(" ", "").is_empty() {
         HttpResponse::Unauthorized()
@@ -112,9 +114,10 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
             .no_cache()
             .reason("Error: Fields can not have spaces").finish()
     } else if users.len() == 1 {
-        cookie = crate::sessions::generate_new_session_cookie();
-        crate::sessions::add_session(cookie.clone());
-        crate::sessions::associate(username.clone().to_uppercase(), cookie.clone());
+        let cookie = &crate::sessions::generate_new_session_cookie();
+
+        crate::sessions::add_session(cookie);
+        crate::sessions::associate(username, cookie);
 
         session.set("session",cookie ).unwrap();
         get_mission_status(session);
@@ -137,8 +140,12 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
     use schema::users::dsl as n;
     use schema::missions::dsl as m;
 
+    let username = &username.to_ascii_uppercase();
+    let password = &password.to_ascii_uppercase();
+    let name = &name.to_ascii_uppercase();
+
     let users: Vec<String> = n::users
-        .filter(n::username.eq(username.to_ascii_uppercase()))
+        .filter(n::username.eq(username))
         .select(n::username)
         .load::<String>(&pool::connect())
         .unwrap();
@@ -159,15 +166,15 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
     } else {
         if diesel::insert_into(n::users)
             .values( models::Users{
-                name: name.to_ascii_uppercase().clone(),
-                username: username.to_ascii_uppercase().clone(),
-                password: password.to_ascii_uppercase().clone(),
+                name: name.clone(),
+                username: username.clone(),
+                password: password.clone(),
             } )
             .execute(&pool::connect())
             .is_ok() {
 
 
-            let user_id = sessions::get_user_id_in_db(username.to_ascii_uppercase());
+            let user_id = sessions::get_user_id_in_db(&username);
 
             if user_id != 0 {
                 diesel::insert_into(m::missions)
