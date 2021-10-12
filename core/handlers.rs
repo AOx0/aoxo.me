@@ -69,7 +69,7 @@ impl NoCache for HttpResponseBuilder {
 pub fn get_mission_status(session: Session) {
     use schema::missions::dsl as m;
 
-    let sessions::UserInfo(_, user_id) = sessions::get_vital_info(&session);
+    let sessions::UserInfo(_, _, user_id) = sessions::get_vital_info(&session);
 
     let missions: models::Missions =  m::missions
         .filter(m::user_id.eq(user_id))
@@ -211,14 +211,20 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
 
 }
 
-fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
+fn handle_file(_session: Session, file: Form<models::File>) -> HttpResponse {
     let file = file.into_inner();
-    let models::File { file, file_id } = &file;
+    let models::File {file_id, .. } = &file;
+    // let sessions::UserInfo(username, session_id, user_id) = sessions::get_vital_info(&session);
 
-    println!("\n\nUser: {}", crate::sessions::get_user_name(session.get("session").unwrap().unwrap()).unwrap());
-    println!("Session: {}", session.get::<String>("session").unwrap().unwrap());
-    println!("File ID: {}", file_id);
-    println!("{}\n\n", file);
+
+    match file_id.as_str() {
+        "file1" => println!("file1"),
+        "file2" => println!("file2"),
+        "file3" => println!("file3"),
+        "file4" => println!("file4"),
+        "file5" => println!("file5"),
+        _ => {}
+    }
 
     HttpResponse::Ok().body("")
 }

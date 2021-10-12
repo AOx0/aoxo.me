@@ -26,20 +26,21 @@ lazy_static! {
     };
 }
 
-pub struct UserInfo(pub String, pub i64);
+pub struct UserInfo(pub String, pub String, pub i64);
 
 pub fn get_vital_info(session: &Session) -> UserInfo {
-    let username = self::get_user_name(session.get::<String>("session").unwrap().unwrap()).unwrap();
+    let session_id = self::get_session(session);
+    let username = self::get_user_name(&session_id).unwrap();
     let user_id = self::get_user_id_in_db(&username);
 
-    return UserInfo(username, user_id);
+    return UserInfo(username,session_id,  user_id);
 }
 
-pub fn get_user_name(session_id: String) -> Option<String> {
+pub fn get_user_name(session_id: &str) -> Option<String> {
     let dict =  USERS_NAMES.lock().unwrap();
 
-    return if dict.contains_key(&*session_id) {
-        Some(dict.get(&session_id).unwrap().clone())
+    return if dict.contains_key(session_id) {
+        Some(dict.get(session_id).unwrap().clone())
     } else {
         None
     }
@@ -56,6 +57,10 @@ pub fn associate(user: &str, session: &str) {
 /// No session_key is generated for non logged in users
 pub fn generate_new_session_cookie() -> String {
     (0..64).map(|_| (0x20u8 + (random::<f32>() * 96.0) as u8) as char).collect()
+}
+
+pub fn get_session(session: &Session) -> String {
+    session.get::<String>("session").expect("Failed to get session").expect("Failed to convert to String")
 }
 
 pub fn add_session(session: &str) {
