@@ -7,6 +7,8 @@
 //!
 //! use actix_web::HttpResponse;
 //! use actix_web::web::Form;
+//! use diesel::RunQueryDsl;
+//! use core::pool;
 //!
 //! fn handle_info_post(query: Form<models::Info>) -> HttpResponse {
 //!     let query = query.into_inner();
@@ -27,6 +29,7 @@
 //!
 //! ```rust
 //! use actix_web::HttpResponse;
+//! use core::pool;
 //!
 //! fn handle_info_get() -> HttpResponse {
 //!     use schema::names::dsl as n;
