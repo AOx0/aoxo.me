@@ -1,3 +1,4 @@
+.env linguist-vendored
 private/**/* linguist-vendored
 public/**/*  linguist-vendored
 
