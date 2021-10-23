@@ -202,7 +202,7 @@ fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg
-        .service(web::resource("/new_user").route(web::post().to(new_user)))
+        //.service(web::resource("/new_user").route(web::post().to(new_user)))
         .service(web::resource("/log_user").route(web::post().to(login_user)))
         .service(web::resource("/mission").route(web::post().to(handle_file)));
 }

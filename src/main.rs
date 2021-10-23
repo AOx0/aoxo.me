@@ -20,7 +20,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .wrap_fn(|mut req, srv|{
-                let urls = vec!["/", "/register", "/home","/login" ];
+                let urls = vec!["/register", "/home","/login" ];
 
                 let session = req.get_session();
 
