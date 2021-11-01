@@ -9,4 +9,5 @@ pub mod ssl;
 pub mod sessions;
 pub mod cache_middleware;
 pub mod handlers;
+pub mod statics;
 

@@ -95,8 +95,11 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
 /// Handles `/new_user` POST. If valid name, username and passwords then registers the user in the database.
 fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
     let query = query.into_inner();
-    let models::UsersForm { name, username, password, password_repeat } = &query;
+    let models::UsersForm { name, username, password, password_repeat,email: mail } = &query;
     let mut success: bool = false;
+
+    use crate::statics::CORREOS;
+
     use schema::users::dsl as n;
     use schema::missions::dsl as m;
 
@@ -110,10 +113,17 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
         .load::<String>(&pool::connect())
         .unwrap();
 
+    let emails: Vec<String> = n::users
+        .filter(n::email.eq(mail))
+        .select(n::email)
+        .load::<String>(&pool::connect())
+        .unwrap();
+
     let result = if users.len() != 0 {
         "Error: The user already exists"
-    } else if
-    name.replace(" ", "") == "" || username.replace(" ", "") == "" ||
+    } else if emails.len() != 0 {
+        "Error: The email already exists"
+    }else if name.replace(" ", "") == "" || username.replace(" ", "") == "" ||
         password.replace(" ", "") == "" || password_repeat.replace(" ", "") == ""
     {
         "Error: There are empty fields"
@@ -129,6 +139,7 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
                 name: name.clone(),
                 username: username.clone(),
                 password: password.clone(),
+                email: mail.clone(),
             } )
             .execute(&pool::connect())
             .is_ok() {
@@ -157,13 +168,20 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
         }
     };
 
+    let result =  if !CORREOS.contains(mail){
+        success = false;
+        "Forbidden"
+    } else {
+        result
+    };
+
     if success {
         HttpResponse::Ok()
             .no_cache()
             .body("")
-
     } else {
-        HttpResponse::Unauthorized().reason(result)
+        HttpResponse::Unauthorized()
+            .reason(result)
             .no_cache()
             .finish()
     }
@@ -200,9 +218,17 @@ fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
     }
 }
 
+fn meet(_: Session) -> HttpResponse {
+    HttpResponse::Found()
+        .header(http::header::LOCATION, "https://up-edu-mx.zoom.us/my/aoxo.me")
+        .finish()
+        .into_body()
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg
-        //.service(web::resource("/new_user").route(web::post().to(new_user)))
+        .service(web::resource("/new_user").route(web::post().to(new_user)))
         .service(web::resource("/log_user").route(web::post().to(login_user)))
-        .service(web::resource("/mission").route(web::post().to(handle_file)));
+        .service(web::resource("/mission").route(web::post().to(handle_file)))
+        .service(web::resource("/meet").route(web::get().to(meet)));
 }

@@ -33,6 +33,7 @@ table! {
         username -> Varchar,
         password -> Varchar,
         name -> Varchar,
+        email -> Varchar,
     }
 }
 

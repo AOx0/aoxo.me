@@ -12,7 +12,8 @@ pub struct User {
 pub struct Users {
     pub username: String,
     pub password: String,
-    pub name: String
+    pub name: String,
+    pub email: String
 }
 
 #[derive(Queryable,  Insertable, Serialize, Deserialize)]
@@ -28,6 +29,7 @@ pub struct UsersForm {
     pub password: String,
     pub password_repeat: String,
     pub name: String,
+    pub email: String
 }
 
 #[derive(Serialize, Deserialize)]

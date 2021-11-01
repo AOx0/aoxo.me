@@ -16,6 +16,7 @@
                     url: "/new_user",
                     data: {
                         name: $('#name').val(),
+                        email: $('#email').val(),
                         username: $('#username').val(),
                         password: $('#password').val(),
                         password_repeat: $('#password_repeat').val()
@@ -41,6 +42,7 @@
             </div>
             <div class="buttons"><input type="text" id="name" class="inp" minlength="0" maxlength="25" required="" placeholder="Name" name="name" style="border-radius: 5px;"></div>
             <div class="buttons"><input type="text" id="username" class="inp" minlength="4" maxlength="16" required="" placeholder="Username" name="username" style="border-radius: 5px;"></div>
+            <div class="buttons"><input type="email" id="email" class="inp" required="" placeholder="Email" name="email" style="border-radius: 5px;"></div>
             <div class="buttons"><input type="password" id="password" class="inp" minlength="4" maxlength="16" required="" placeholder="Password" style="border-radius: 5px;"></div>
             <div class="buttons"><input type="password" id="password_repeat" class="inp" minlength="4" maxlength="16" required="" placeholder="Repeat password" style="border-radius: 5px;"></div>
             <div class="buttons"><a class="btn btn-primary" role="button" onclick="post()">Register</a></div>
