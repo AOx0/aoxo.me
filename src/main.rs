@@ -19,7 +19,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap_fn(|mut req, srv|{
                 let _allowed_always = vec!["/new_user", "/log_user", "/register", "/login", "/new_user", "/log_user"  ];
-                let only_with_logged_paths = vec!["/home", "/meet" ];
+                let only_with_logged_paths = vec!["/home" ];
 
                 let session = req.get_session();
 
@@ -69,6 +69,11 @@ async fn main() -> std::io::Result<()> {
                     } else if logged_in  {
                         Either::Left(srv.call(req))
                     } else {
+                        let path = req.path().to_string();
+                        let to_insert = ("goes-to".to_string(), serde_json::to_string(&path.to_string()).unwrap());
+                        Session::set_session(vec![to_insert], &mut req);
+                        session.set("goes-to",&path.to_string()).unwrap();
+
                         Either::Right(ok(req.into_response(
                             HttpResponse::Found()
                                 .header(http::header::LOCATION, "/login")

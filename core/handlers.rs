@@ -63,8 +63,6 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
         .load::<String>(&pool::connect())
         .unwrap();
 
-
-
     if password.replace(" ", "").is_empty() || username.replace(" ", "").is_empty() {
         HttpResponse::Unauthorized()
             .no_cache()
@@ -79,12 +77,18 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
         crate::sessions::add_session(cookie);
         crate::sessions::associate(username, cookie);
 
+
         session.set("session",cookie ).unwrap();
-        get_mission_status(session);
+        // get_mission_status(session);
+
+
+
+        let request = session.get::<String>("goes-to").unwrap().unwrap_or("/".to_string());
+
 
         HttpResponse::Ok()
             .no_cache()
-            .body("")
+            .body(request.to_string())
     } else {
         HttpResponse::Unauthorized()
             .no_cache()
@@ -220,7 +224,7 @@ fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
 
 fn meet(_: Session) -> HttpResponse {
     HttpResponse::Found()
-        .header(http::header::LOCATION, "https://up-edu-mx.zoom.us/my/aoxo.me")
+        .header(http::header::LOCATION, "https://up-edu-mx.zoom.us/j/7899086653?pwd=d2s0VXpIaCtHNy9haXhtVVZwK1dPQT09")
         .finish()
         .into_body()
 }

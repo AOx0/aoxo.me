@@ -19,11 +19,11 @@
                         password: $('#password').val()
                     },
                     success: function (_) {
-                        window.location.href = "/home";
+                        console.log(_);
+                        window.location.href = _;
                     },
                     error: function (_,__, msg) {
                         $('#result').replaceWith(`<p class="text-center" id="result">${msg}</p>`)
-
                     }
                 }
             )
