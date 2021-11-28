@@ -229,10 +229,26 @@ fn meet(_: Session) -> HttpResponse {
         .into_body()
 }
 
+fn info1(_: Session) -> HttpResponse {
+    HttpResponse::Found()
+        .header(http::header::LOCATION, "https://stackoverflow.com/questions/8447/what-does-the-flags-enum-attribute-mean-in-c")
+        .finish()
+        .into_body()
+}
+
+fn info2(_: Session) -> HttpResponse {
+    HttpResponse::Found()
+        .header(http::header::LOCATION, "https://stackoverflow.com/questions/1030090/how-do-you-pass-multiple-enum-values-in-c")
+        .finish()
+        .into_body()
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg
+        .service(web::resource("/meet").route(web::get().to(meet)))
+        .service(web::resource("/in1").route(web::get().to(info1)))
+        .service(web::resource("/in2").route(web::get().to(info2)))
         .service(web::resource("/new_user").route(web::post().to(new_user)))
         .service(web::resource("/log_user").route(web::post().to(login_user)))
-        .service(web::resource("/mission").route(web::post().to(handle_file)))
-        .service(web::resource("/meet").route(web::get().to(meet)));
+        .service(web::resource("/mission").route(web::post().to(handle_file)));
 }
