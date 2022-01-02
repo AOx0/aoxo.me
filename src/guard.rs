@@ -3,19 +3,16 @@ use std::time::Duration;
 use std::process::Command;
 
 fn main() {
-    const OK: [u8; 2] = [111, 110];
-
     loop {
         let c = Command::new("curl")
             .arg("-L")
             .args(["--connect-timeout", "3"])
             .arg("aoxo.me/status.html")
             .output()
-            .expect("Failed to execute guard");
-        
+            .expect("Failed to execute guard")
+            .stdout.len();
 
-        if c.stdout.len() == 0 {
-//            println!("Server is down");
+        if c == 0 {
             Command::new("killall")
                 .arg("aoxo")
                 .output()
@@ -25,16 +22,9 @@ fn main() {
                 .spawn() {
                     sleep(Duration::from_secs(2));
                     continue;
-                } else {
-//                    eprintln!("Failed to spawn") 
-                };
-        } else if &c.stdout[..] == &OK[..] {
-//            println!("Server up!");
-        } else {
-//            println!("Unknown error");
+                }
         }
         
         sleep(Duration::from_secs(60));
-    
     }
 }
