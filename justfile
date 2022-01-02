@@ -5,3 +5,6 @@ act:
     cd /users/alejandro/actix/ 
     ./target/release/guard &
     disown
+
+@kill:
+    -killall guard aoxo

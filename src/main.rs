@@ -7,6 +7,7 @@ use actix_web::dev::Service;
 use futures::future::{Either, ok};
 
 use actix_session::*;
+use actix_web::http::header::HeaderValue;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -17,6 +18,23 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
+            .wrap_fn(|req, srv| {
+                let fut = srv.call(req);
+
+                Box::pin(async move {
+                    let mut res = fut.await?;
+                    let headers = res.headers_mut();
+                    headers.append(
+                        actix_web::http::header::CACHE_CONTROL,
+                        HeaderValue::from_str("no-cache").unwrap()
+                    );
+                    headers.append(
+                        actix_web::http::header::CACHE_CONTROL,
+                        HeaderValue::from_str("no-store").unwrap()
+                    );
+                    return Ok(res);
+                })
+            })
             .wrap_fn(|req, srv| {
             if req.connection_info().scheme() == "https"
             {
