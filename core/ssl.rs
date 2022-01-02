@@ -1,6 +1,7 @@
 use std::io::BufReader;
-use rustls::internal::pemfile::{certs, pkcs8_private_keys};
-use rustls::{NoClientAuth, ServerConfig};
+use rustls_pemfile::{certs, pkcs8_private_keys};
+use rustls::{Certificate, PrivateKey, ServerConfig};
+
 
 pub fn load_ssl() -> ServerConfig {
     // convertí el .p12 a .crt y .key con la herramienta en namecheap
@@ -12,11 +13,19 @@ pub fn load_ssl() -> ServerConfig {
     let mut chain = BufReader::new(CHAIN);
     let mut key = BufReader::new(KEY);
 
-    let mut config = ServerConfig::new(NoClientAuth::new());
     let cert_chain = certs(&mut chain).unwrap();
-
     let mut keys = pkcs8_private_keys(&mut key).unwrap();
-    config.set_single_cert(cert_chain, keys.remove(0)).unwrap();
 
-    config
+    let k = PrivateKey(keys.remove(0));
+
+    let mut c: Vec<Certificate> = Vec::new();
+    for certificate in cert_chain {
+        c.push(Certificate(certificate))
+    }
+
+    ServerConfig::builder()
+        .with_safe_defaults()
+        .with_no_client_auth()
+        .with_single_cert(c, k)
+        .unwrap()
 }

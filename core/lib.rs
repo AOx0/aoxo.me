@@ -7,7 +7,7 @@ pub mod pool;
 pub mod schema;
 pub mod ssl;
 pub mod sessions;
-pub mod cache_middleware;
+//pub mod cache_middleware;
 pub mod handlers;
 pub mod statics;
 

@@ -6,9 +6,9 @@
 
 use actix_web::web::{Form};
 use actix_web::http::header::{CacheControl, CacheDirective};
-use actix_web::{http, HttpResponse, web};
-use actix_session::*;
-use actix_web::dev::HttpResponseBuilder;
+use actix_web::{http, HttpResponse, HttpResponseBuilder, web};
+use actix_session::Session;
+
 use crate::diesel::prelude::*;
 use crate::{models, pool, schema, sessions};
 
@@ -20,11 +20,12 @@ trait NoCache {
 impl NoCache for HttpResponseBuilder {
     fn no_cache(&mut self) -> &mut HttpResponseBuilder {
         self
-            .set(CacheControl(vec![CacheDirective::NoCache]))
-            .set(CacheControl(vec![CacheDirective::NoStore]));
+            .insert_header(CacheControl(vec![CacheDirective::NoCache]))
+            .insert_header(CacheControl(vec![CacheDirective::NoStore]));
         self
     }
 }
+
 
 pub fn get_mission_status(session: Session) {
     use schema::missions::dsl as m;
@@ -39,11 +40,11 @@ pub fn get_mission_status(session: Session) {
 
     println!("{:?}", missions);
 
-    session.set("mission1", missions.mission1).expect("Failed to get mission1");
-    session.set("mission2", missions.mission2).expect("Failed to get mission2");
-    session.set("mission3", missions.mission3).expect("Failed to get mission3");
-    session.set("mission4", missions.mission4).expect("Failed to get mission4");
-    session.set("mission5", missions.mission5).expect("Failed to get mission5");
+    session.insert("mission1", missions.mission1).expect("Failed to get mission1");
+    session.insert("mission2", missions.mission2).expect("Failed to get mission2");
+    session.insert("mission3", missions.mission3).expect("Failed to get mission3");
+    session.insert("mission4", missions.mission4).expect("Failed to get mission4");
+    session.insert("mission5", missions.mission5).expect("Failed to get mission5");
 }
 
 
@@ -78,7 +79,7 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
         crate::sessions::associate(username, cookie);
 
 
-        session.set("session",cookie ).unwrap();
+        session.insert("session",cookie ).unwrap();
         // get_mission_status(session);
 
 
@@ -216,31 +217,29 @@ fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
         HttpResponse::Ok().body("")
     } else {
         HttpResponse::Found()
-            .header(http::header::LOCATION, "/login")
+            .append_header((http::header::LOCATION, "/login"))
             .finish()
-            .into_body()
     }
 }
 
 fn meet(_: Session) -> HttpResponse {
     HttpResponse::Found()
-        .header(http::header::LOCATION, "https://up-edu-mx.zoom.us/j/7899086653?pwd=d2s0VXpIaCtHNy9haXhtVVZwK1dPQT09")
+        .append_header((http::header::LOCATION, "https://up-edu-mx.zoom.us/j/7899086653?pwd=d2s0VXpIaCtHNy9haXhtVVZwK1dPQT09"))
         .finish()
-        .into_body()
 }
 
 fn info1(_: Session) -> HttpResponse {
     HttpResponse::Found()
-        .header(http::header::LOCATION, "https://stackoverflow.com/questions/8447/what-does-the-flags-enum-attribute-mean-in-c")
+        .append_header((http::header::LOCATION, "https://stackoverflow.com/questions/8447/what-does-the-flags-enum-attribute-mean-in-c"))
         .finish()
-        .into_body()
 }
 
 fn info2(_: Session) -> HttpResponse {
     HttpResponse::Found()
-        .header(http::header::LOCATION, "https://stackoverflow.com/questions/1030090/how-do-you-pass-multiple-enum-values-in-c")
+        .append_header((http::header::LOCATION, "https://stackoverflow.com/questions/1030090/how-do-you-pass-multiple-enum-values-in-c"))
         .finish()
-        .into_body()
+
+
 }
 
 pub fn routes(cfg: &mut web::ServiceConfig) {

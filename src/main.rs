@@ -1,9 +1,9 @@
 use actix_files::Files;
-use actix_web::{App, http, HttpResponse, HttpServer, web};
+use actix_web::{App, http, HttpResponse, HttpServer};
 use actix_web::cookie::SameSite;
 use actix_web::dev::Service;
 
-use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
+//use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use futures::future::{Either, ok};
 
 use actix_session::*;
@@ -17,6 +17,23 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
+            .wrap_fn(|req, srv| {
+            if req.connection_info().scheme() == "https"
+            {
+                Either::Left(srv.call(req))
+            } else {
+                let host = req.connection_info().host().to_owned();
+                let uri = req.uri().to_owned();
+                let url = format!("https://{}{}", host, uri);
+
+                Either::Right(ok(req.into_response(
+                    HttpResponse::TemporaryRedirect()
+                        .insert_header((http::header::LOCATION, url))
+                        .finish()
+                )))
+
+                }
+            })
             .wrap_fn(|mut req, srv|{
                 let _allowed_always = vec!["/new_user", "/log_user", "/register", "/login", "/new_user", "/log_user"  ];
                 let only_with_logged_paths = vec!["/home" ];
@@ -32,7 +49,7 @@ async fn main() -> std::io::Result<()> {
                         logged_in = core::sessions::is_user_logged_in(&session);
                     } else {
                         let to_insert = ("session".to_string(), serde_json::to_string(&"NONE".to_string()).unwrap());
-                        Session::set_session(vec![to_insert], &mut req);
+                        Session::set_session(&mut req, vec![to_insert] );
                     }
 
                     let main_url = "/home";
@@ -71,14 +88,13 @@ async fn main() -> std::io::Result<()> {
                     } else {
                         let path = req.path().to_string();
                         let to_insert = ("goes-to".to_string(), serde_json::to_string(&path.to_string()).unwrap());
-                        Session::set_session(vec![to_insert], &mut req);
-                        session.set("goes-to",&path.to_string()).unwrap();
+                        Session::set_session(&mut req, vec![to_insert]);
+                        session.insert("goes-to",&path.to_string()).unwrap();
 
                         Either::Right(ok(req.into_response(
                             HttpResponse::Found()
-                                .header(http::header::LOCATION, "/login")
+                                .insert_header((http::header::LOCATION, "/login"))
                                 .finish()
-                                .into_body(),
                         )))
                     }
                 }
@@ -89,13 +105,9 @@ async fn main() -> std::io::Result<()> {
                 .path("/")
                 .name("session")
             )
-            .wrap(RedirectSchemeBuilder::new().build())
+            //.wrap(RedirectSchemeBuilder::new().build())
             .configure(core::routes)
-            .service(
-                web::scope("/")
-                    .wrap(core::cache_middleware::MyCacheInterceptor)
-                    .service(Files::new("", "./public/.").show_files_listing().index_file("index.html"))
-            )
+            .service(Files::new("/", "/Users/alejandro/actix/public/").index_file("index.html"))
     })
         .bind("0.0.0.0:80")?
         .bind_rustls("0.0.0.0:443", builder.clone())?
