@@ -22,7 +22,7 @@ async fn main() -> std::io::Result<()> {
                 let fut = srv.call(req);
 
                 Box::pin(async move {
-                    let mut res: ServiceResponse = fut.await?;
+                    let res: ServiceResponse = fut.await?;
 
                     if res.request().path() == "/p/covid" || res.request().path() == "/p/covid/"
                         && res.request().headers().contains_key(actix_web::http::header::USER_AGENT) {
@@ -36,9 +36,6 @@ async fn main() -> std::io::Result<()> {
                         if user_agent.to_lowercase().contains("safari")
                             && user_agent.to_lowercase().contains("version")
                             && !user_agent.to_lowercase().contains("chrome") {
-
-                            println!("{}", res.request().path().to_string());
-                            println!("{}", user_agent);
 
                             let res_clone = res.request().clone();
 
@@ -60,6 +57,16 @@ async fn main() -> std::io::Result<()> {
                             return Ok(new_res);
                         }
                     }
+
+
+                    return Ok(res);
+                })
+            })
+            .wrap_fn(|req: ServiceRequest, srv| {
+                let fut = srv.call(req);
+
+                Box::pin(async move {
+                    let mut res: ServiceResponse = fut.await?;
 
                     let headers = res.headers_mut();
 
