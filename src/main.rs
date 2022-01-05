@@ -1,5 +1,5 @@
 use actix_files::Files;
-use actix_web::{App, HttpServer};
+use actix_web::{App, body, HttpServer};
 use actix_web::cookie::SameSite;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse};
 
@@ -17,18 +17,49 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-
+            // Serve pdf files to Safari users
             .wrap_fn(|req: ServiceRequest, srv| {
                 let fut = srv.call(req);
 
                 Box::pin(async move {
                     let mut res: ServiceResponse = fut.await?;
 
-                    let path: Option<String> = if res.request().path().contains("pdf") {
-                        Some(res.request().path().to_string())
-                    } else {
-                        None
-                    };
+                    if res.request().path() == "/p/covid" || res.request().path() == "/p/covid/"
+                        && res.request().headers().contains_key(actix_web::http::header::USER_AGENT) {
+                        let user_agent = res.request().headers()
+                            .get(actix_web::http::header::USER_AGENT)
+                            .unwrap()
+                            .to_str()
+                            .unwrap()
+                            .to_string();
+
+                        if user_agent.to_lowercase().contains("safari")
+                            && user_agent.to_lowercase().contains("version")
+                            && !user_agent.to_lowercase().contains("chrome") {
+
+                            println!("{}", res.request().path().to_string());
+                            println!("{}", user_agent);
+
+                            let res_clone = res.request().clone();
+
+                            let _body_data = match std::str::from_utf8(&body::to_bytes(res.into_body()).await?){
+                                Ok(str) => {
+                                    str.to_string()
+                                }
+                                Err(_) => {
+                                    "Unknown".to_string()
+                                }
+                            };
+
+                            let new_res = ServiceResponse::new(
+                                res_clone,
+                                actix_web::HttpResponse::Ok()
+                                    .body(_body_data.replace(".png", ".pdf"))
+                            );
+
+                            return Ok(new_res);
+                        }
+                    }
 
                     let headers = res.headers_mut();
 
@@ -42,14 +73,6 @@ async fn main() -> std::io::Result<()> {
                         HeaderValue::from_str("no-store").unwrap()
                     );
 
-                    if let Some(_) = path {
-                        headers.remove(actix_web::http::header::CONTENT_DISPOSITION);
-
-                        headers.append(
-                            actix_web::http::header::CONTENT_DISPOSITION,
-                            HeaderValue::from_str("inline").unwrap()
-                        );
-                    }
 
                     return Ok(res);
                 })
