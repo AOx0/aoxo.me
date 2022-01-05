@@ -1,0 +1,65 @@
+.wrap_fn(|mut req, srv|{
+                let _allowed_always = vec!["/new_user", "/log_user", "/register", "/login", "/new_user", "/log_user"  ];
+                let only_with_logged_paths = vec!["/home" ];
+
+                let session = req.get_session();
+
+                if !only_with_logged_paths.contains(&req.path()) {
+                    Either::Left(srv.call(req))
+                } else {
+                    let mut logged_in : bool = false;
+
+                    if let Some(_) = req.get_session().get::<String>("session").unwrap() {
+                        logged_in = core::sessions::is_user_logged_in(&session);
+                    } else {
+                        let to_insert = ("session".to_string(), serde_json::to_string(&"NONE".to_string()).unwrap());
+                        Session::set_session(&mut req, vec![to_insert] );
+                    }
+
+                    let main_url = "/home";
+
+
+                    if logged_in && req.path() == main_url {
+                        let mut home = include_str!("../public/home/index.html").to_string();
+
+                        core::handlers::get_mission_status(req.get_session());
+
+                        {
+                            if req.get_session().get::<bool>("mission1").unwrap().unwrap() {
+                                home = home.replace("Mission 1", "Mission 1 ✔");
+                            }
+
+                            if req.get_session().get::<bool>("mission2").unwrap().unwrap() {
+                                home = home.replace("Mission 2", "Mission 2 ✔");
+                            }
+
+                            if req.get_session().get::<bool>("mission3").unwrap().unwrap() {
+                                home = home.replace("Mission 3", "Mission 3 ✔");
+                            }
+
+                            if req.get_session().get::<bool>("mission4").unwrap().unwrap() {
+                                home = home.replace("Mission 4", "Mission 4 ✔");
+                            }
+
+                            if req.get_session().get::<bool>("mission5").unwrap().unwrap() {
+                                home = home.replace("Mission 5", "Mission 5 ✔");
+                            }
+                        }
+
+                        Either::Right(ok(req.into_response(HttpResponse::Ok().body(home))))
+                    } else if logged_in  {
+                        Either::Left(srv.call(req))
+                    } else {
+                        let path = req.path().to_string();
+                        let to_insert = ("goes-to".to_string(), serde_json::to_string(&path.to_string()).unwrap());
+                        Session::set_session(&mut req, vec![to_insert]);
+                        session.insert("goes-to",&path.to_string()).unwrap();
+
+                        Either::Right(ok(req.into_response(
+                            HttpResponse::Found()
+                                .insert_header((http::header::LOCATION, "/login"))
+                                .finish()
+                        )))
+                    }
+                }
+            })

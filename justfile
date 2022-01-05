@@ -1,5 +1,6 @@
 set dotenv-load := false
-alias update:= up
+alias update := up
+alias ko := kill_and_act
 
 default: up
 
@@ -8,6 +9,11 @@ act:
     cd /users/alejandro/actix/ 
     ./target/release/guard &
     disown
+
+@silent_kill:
+    -killall guard 2>/dev/null >/dev/null
+    -killall aoxo 2>/dev/null >/dev/null
+
 
 @kill:
     -killall guard
@@ -25,3 +31,5 @@ _replace:
         f.close()
 @up: && _replace
     cp /Users/alejandro/AOx0.github.io/index.html /Users/alejandro/actix/public
+
+kill_and_act: silent_kill silent_kill act
