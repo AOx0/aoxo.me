@@ -9,7 +9,7 @@ act:
     ./target/release/guard &
     disown
 
-kill:
+@kill:
     -killall guard
     -killall aoxo
 
