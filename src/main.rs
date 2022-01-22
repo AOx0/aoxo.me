@@ -24,7 +24,7 @@ async fn main() -> std::io::Result<()> {
                 Box::pin(async move {
                     let res: ServiceResponse = fut.await?;
 
-                    if res.request().path() == "/p/covid" || res.request().path() == "/p/covid/"
+                    if res.request().path() == "/p/covid/"
                         && res.request().headers().contains_key(actix_web::http::header::USER_AGENT) {
                         let user_agent = res.request().headers()
                             .get(actix_web::http::header::USER_AGENT)
@@ -84,7 +84,37 @@ async fn main() -> std::io::Result<()> {
                     return Ok(res);
                 })
             })
-            .wrap(RedirectSchemeBuilder::new().build())
+            .wrap_fn(|req: ServiceRequest, srv| {
+                let fut = srv.call(req);
+
+                Box::pin(async move {
+                    let res: ServiceResponse = fut.await?;
+
+                    if res.request().path() == "/p/covid" {
+
+
+                        let res_clone = res.request().clone();
+
+
+                        let new_res = ServiceResponse::new(
+                            res_clone,
+                            actix_web::HttpResponse::Found()
+                                .insert_header((actix_web::http::header::LOCATION, "/p/covid/"))
+                                .finish()
+
+                        );
+
+
+                        return Ok(new_res);
+
+                    }
+
+
+                    return Ok(res);
+                })
+            })
+            .wrap(RedirectSchemeBuilder::new()
+                .build())
             .wrap(CookieSession::signed(&[0; 128])
                 .secure(true).http_only(false)
                 .same_site(SameSite::Strict)
