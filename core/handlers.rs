@@ -48,7 +48,7 @@ pub fn get_mission_status(session: Session) {
 }
 
 
-fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse {
+async fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse {
     // println!("En login: {:?}", session.get::<String>("session"));
     let query = query.into_inner();
     let models::UsersLogin {  username, password} = &query;
@@ -98,7 +98,7 @@ fn login_user(session: Session, query: Form<models::UsersLogin>) -> HttpResponse
 }
 
 /// Handles `/new_user` POST. If valid name, username and passwords then registers the user in the database.
-fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
+async fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
     let query = query.into_inner();
     let models::UsersForm { name, username, password, password_repeat,email: mail } = &query;
     let mut success: bool = false;
@@ -194,7 +194,7 @@ fn new_user(query: Form<models::UsersForm>) -> HttpResponse {
 
 }
 
-fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
+async fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
 
 
     if sessions::is_user_logged_in(&session) {
@@ -222,24 +222,22 @@ fn handle_file(session: Session, file: Form<models::File>) -> HttpResponse {
     }
 }
 
-fn meet(_: Session) -> HttpResponse {
+async fn meet(_: Session) -> HttpResponse {
     HttpResponse::Found()
         .append_header((http::header::LOCATION, "https://up-edu-mx.zoom.us/j/7899086653?pwd=d2s0VXpIaCtHNy9haXhtVVZwK1dPQT09"))
         .finish()
 }
 
-fn info1(_: Session) -> HttpResponse {
+async fn info1(_: Session) -> HttpResponse {
     HttpResponse::Found()
         .append_header((http::header::LOCATION, "https://stackoverflow.com/questions/8447/what-does-the-flags-enum-attribute-mean-in-c"))
         .finish()
 }
 
-fn info2(_: Session) -> HttpResponse {
+async fn info2(_: Session) -> HttpResponse {
     HttpResponse::Found()
         .append_header((http::header::LOCATION, "https://stackoverflow.com/questions/1030090/how-do-you-pass-multiple-enum-values-in-c"))
         .finish()
-
-
 }
 
 pub fn routes(cfg: &mut web::ServiceConfig) {

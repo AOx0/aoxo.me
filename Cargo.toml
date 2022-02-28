@@ -39,7 +39,7 @@ rustls = "0.20.4"
 rustls-pemfile = "0.3.0"
 
 # To make objects from json to data rust types
-serde="1.0.136"
+serde= {version="1.0.136", features= ["serde_derive"]}
 serde_json = "1.0.79"
 
 # To communicate to db
